@@ -1,7 +1,7 @@
 /*
  * @Author: Quan Si
  * @Date: 2024-05-23 16:49:56
- * @LastEditTime: 2024-06-03 21:55:46
+ * @LastEditTime: 2024-06-29 20:57:49
  * @LastEditors: Quan Si
  * @Description: TM1637驱动程序
  * @FilePath: \keil\TM1637.c
@@ -15,9 +15,14 @@
 void startTM1637()
 {
 	SCL = 1;
+	_nop_();
+	_nop_();
 	SDA = 1;
 	_nop_();
+	_nop_();
 	SDA = 0;
+	_nop_();
+	_nop_();
 	SCL = 0;
 }
 
@@ -31,8 +36,11 @@ void writeTM1637(uchar dat)
 	uchar i = 0;
 	for (; i < 8; i++)
 	{
+		_nop_();
+		_nop_();
 		SDA = dat & 1; // 低在前
 		SCL = 1;
+		_nop_();
 		_nop_();
 		SCL = 0;
 		dat >>= 1;
@@ -47,10 +55,16 @@ void ackTM1637()
 {
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	while (SDA)
+	{
 		buzzer = 0;
+	}
 	buzzer = 1;
 	SCL = 1;
+	_nop_();
 	_nop_();
 	SCL = 0;
 }
@@ -62,9 +76,14 @@ void ackTM1637()
 void stopTM1637()
 {
 	SCL = 0;
+	_nop_();
+	_nop_();
 	SDA = 0;
 	_nop_();
+	_nop_();
 	SCL = 1;
+	_nop_();
+	_nop_();
 	SDA = 1;
 }
 
@@ -83,14 +102,11 @@ uchar keyTM1637()
 	{
 		temp >>= 1;
 		_nop_();
-		_nop_();
 		SCL = 1;
 		if (SDA)
 			temp |= 0x80;
 		_nop_();
-		_nop_();
 		SCL = 0;
-		_nop_();
 		_nop_();
 	}
 	ackTM1637();
