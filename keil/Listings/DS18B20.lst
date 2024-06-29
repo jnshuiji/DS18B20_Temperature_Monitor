@@ -1,0 +1,237 @@
+C51 COMPILER V9.60.7.0   DS18B20                                                           06/27/2024 12:43:19 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE DS18B20
+OBJECT MODULE PLACED IN .\Objects\DS18B20.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE DS18B20.c OPTIMIZE(8,SPEED) BROWSE INCDIR(D:\Keil_v5\C51\INC\Atmel) DEBU
+                    -G OBJECTEXTEND PRINT(.\Listings\DS18B20.lst) TABS(2) OBJECT(.\Objects\DS18B20.obj)
+
+line level    source
+
+   1          /*
+   2           * @Author: Quan Si
+   3           * @Date: 2024-05-23 14:18:30
+   4           * @LastEditTime: 2024-06-03 21:51:18
+   5           * @LastEditors: Quan Si
+   6           * @Description: DS18B20驱动程序
+   7           * @FilePath: \keil\DS18B20.c
+   8           */
+   9          #include "DS18B20.H"
+  10          
+  11          // 12MHz
+  12          void delay5us(uchar n)
+  13          {
+  14   1        do
+  15   1        {
+  16   2          _nop_();
+  17   2          _nop_();
+  18   2          _nop_();
+  19   2          n--;
+  20   2        } while (n);
+  21   1      }
+  22          
+  23          /**
+  24           * @description: 初始化
+  25           * @return {bit} ack 0应答，1无应答
+  26           */
+  27          bit initDS18B20()
+  28          {
+  29   1        bit ack = 0;
+  30   1        DQ = 0;
+  31   1        delay5us(96);
+  32   1        DQ = 1;
+  33   1        delay5us(12);
+  34   1        ack = DQ;
+  35   1        delay5us(60); // 太大太小都不行
+  36   1        return ack;
+  37   1      }
+  38          
+  39          /**
+  40           * @description: 向DS18B20读取一字节数据
+  41           * @return {uchar} dat
+  42           */
+  43          uchar readbyteDS18B20()
+  44          {
+  45   1        uchar i = 0;
+  46   1        uchar dat = 0;
+  47   1        for (i = 0; i < 8; i++)
+  48   1        {
+  49   2          DQ = 0;
+  50   2          _nop_();
+  51   2          _nop_();
+  52   2          DQ = 1;
+  53   2          dat >>= 1;
+  54   2          if (DQ)
+C51 COMPILER V9.60.7.0   DS18B20                                                           06/27/2024 12:43:19 PAGE 2   
+
+  55   2          {
+  56   3            dat |= 0x80;
+  57   3          }
+  58   2          delay5us(11);
+  59   2        }
+  60   1        return dat;
+  61   1      }
+  62          
+  63          /**
+  64           * @description: 向DS18B20写入一字节数据，低位在前
+  65           * @param {uchar} dat
+  66           * @return {*}
+  67           */
+  68          void writebyteDS18B20(uchar dat)
+  69          {
+  70   1        uchar i = 0;
+  71   1        for (i = 0; i < 8; i++)
+  72   1        {
+  73   2          DQ = 0;
+  74   2          _nop_();
+  75   2          _nop_();
+  76   2          DQ = dat & 0x01;
+  77   2          delay5us(12);
+  78   2          DQ = 1;
+  79   2          dat >>= 1;
+  80   2          _nop_();
+  81   2          _nop_();
+  82   2        }
+  83   1      }
+  84          
+  85          /********************************************************/
+  86          /*DS18B20的CRC8校验程序*/
+  87          /********************************************************/
+  88          /**
+  89           * @description: 一字节CRC8
+  90           * @param {uchar} abyte 数据
+  91           * @return {uchar} crc 返回CRC校验码
+  92           */
+  93          uchar calcrc_1byte(uchar abyte)
+  94          {
+  95   1        uchar i, crc_1byte;
+  96   1        crc_1byte = 0; // 设定crc_1byte初值为0
+  97   1        for (i = 0; i < 8; i++)
+  98   1        {
+  99   2          if ((crc_1byte ^ abyte) & 0x01)
+ 100   2          {
+ 101   3            crc_1byte ^= 0x18;
+ 102   3            crc_1byte >>= 1;
+ 103   3            crc_1byte |= 0x80;
+ 104   3          }
+ 105   2          else
+ 106   2            crc_1byte >>= 1;
+ 107   2          abyte >>= 1;
+ 108   2        }
+ 109   1        return crc_1byte;
+ 110   1      }
+ 111          /**
+ 112           * @description: 多字节CRC8
+ 113           * @param {uchar} *p 数据指针
+ 114           * @param {uchar} len 字节数
+ 115           * @return {uchar} crc 返回CRC校验码
+ 116           */
+C51 COMPILER V9.60.7.0   DS18B20                                                           06/27/2024 12:43:19 PAGE 3   
+
+ 117          uchar calcrc_bytes(uchar *p, uchar len)
+ 118          {
+ 119   1        uchar crc = 0;
+ 120   1        while (len--) // len为总共要校验的字节数
+ 121   1        {
+ 122   2          crc = calcrc_1byte(crc ^ *p++);
+ 123   2        }
+ 124   1        return crc;
+ 125   1      }
+ 126          
+ 127          /**
+ 128           * @description: 读取温度，如果数据传输不正确则报警间隔1s
+ 129           * @return {uint} temp
+ 130           */
+ 131          uint Read_temp_DS18B20()
+ 132          {
+ 133   1        uchar i = 0;
+ 134   1        uchar byte9[9];
+ 135   1        uint temp = 0;
+ 136   1        initDS18B20();
+ 137   1        writebyteDS18B20(Skip_Rom);
+ 138   1        writebyteDS18B20(Convert_T);
+ 139   1        delay1ms(100);
+ 140   1        initDS18B20();
+ 141   1        writebyteDS18B20(Skip_Rom);
+ 142   1        writebyteDS18B20(Read_Scratchpad);
+ 143   1        for (i = 0; i < 9; i++)
+ 144   1        {
+ 145   2          byte9[i] = readbyteDS18B20();
+ 146   2        }
+ 147   1        while (calcrc_bytes(&byte9, 9)) // 数据正确CRC应为0
+ 148   1        {
+ 149   2          buzzer = 0;
+ 150   2          delay1ms(1000);
+ 151   2          buzzer = 1;
+ 152   2          delay1ms(1000);
+ 153   2        }
+ 154   1        temp = byte9[0] | ((byte9[1] | temp) << 8);
+ 155   1        return temp;
+ 156   1      }
+ 157          
+ 158          /**
+ 159           * @description: 读取EEPROM中的上下限温度，高8位为上限，低8位为下限，如果数据传
+             -输不正确则警报间隔2s
+ 160           * @return {uint} temp 上下限温度
+ 161           */
+ 162          uint Read_EEPROM_DS18B20()
+ 163          {
+ 164   1        uchar i = 0;
+ 165   1        uchar byte9[9];
+ 166   1        uint temp = 0;
+ 167   1        initDS18B20();
+ 168   1        writebyteDS18B20(Skip_Rom);
+ 169   1        writebyteDS18B20(Recall_EEPROM);
+ 170   1        initDS18B20();
+ 171   1        writebyteDS18B20(Skip_Rom);
+ 172   1        writebyteDS18B20(Read_Scratchpad);
+ 173   1        for (i = 0; i < 9; i++)
+ 174   1        {
+ 175   2          byte9[i] = readbyteDS18B20();
+ 176   2        }
+ 177   1        while (calcrc_bytes(&byte9, 9)) // 数据正确CRC应为0
+C51 COMPILER V9.60.7.0   DS18B20                                                           06/27/2024 12:43:19 PAGE 4   
+
+ 178   1        {
+ 179   2          buzzer = 0;
+ 180   2          delay1ms(2000);
+ 181   2          buzzer = 1;
+ 182   2          delay1ms(2000);
+ 183   2        }
+ 184   1        temp = byte9[3] | ((byte9[2] | temp) << 8);
+ 185   1        return temp;
+ 186   1      }
+ 187          
+ 188          /**
+ 189           * @description:  向EEPROM中写入上下限温度
+ 190           * @param {uchar} TH 上限温度
+ 191           * @param {uchar} TL 下限温度
+ 192           * @param {uchar} precision 精度
+ 193           * @return {*}
+ 194           */
+ 195          void Write_Scratchpad_EEPROM_DS18B20(uchar TH, uchar TL, uchar precision)
+ 196          {
+ 197   1        initDS18B20();
+ 198   1        writebyteDS18B20(Skip_Rom);
+ 199   1        writebyteDS18B20(Write_Scratchpad);
+ 200   1        writebyteDS18B20(TH);
+ 201   1        writebyteDS18B20(TL);
+ 202   1        writebyteDS18B20(precision);
+ 203   1        initDS18B20();
+ 204   1        writebyteDS18B20(Skip_Rom);
+ 205   1        writebyteDS18B20(Copy_Scratchpad);
+ 206   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    406    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      25
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

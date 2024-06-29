@@ -1,0 +1,20 @@
+Build target 'Target 1'
+compiling main.c...
+compiling DS18B20.c...
+compiling TM1637.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_CALCRC_BYTES?DS18B20
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_WRITE_SCRATCHPAD_EEPROM_DS18B20?DS18B20
+
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?KEYTM1637?TM1637
+    CALLER1: ?PR?INTERRUPT0_SETLUMINANCE?MAIN
+    CALLER2: ?C_C51STARTUP
+
+Program Size: data=51.2 xdata=0 code=1605
+creating hex file from ".\Objects\program"...
+".\Objects\program" - 0 Error(s), 3 Warning(s).
+Build Time Elapsed:  00:00:00
