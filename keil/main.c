@@ -1,4 +1,5 @@
 #include "TM1637.h"
+#include "LCD1602.h"
 
 uchar timer = 0;	  // 时间计次
 uchar luminance = 8;  // 默认亮度为8挡，最亮
@@ -14,8 +15,8 @@ uchar sg[] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F, 0x39, 
 uchar sg1[] = {0xBF, 0x86, 0xDB, 0xCF, 0xE6, 0xED, 0xFD, 0x87, 0xFF, 0xEF}; // 带点共阴段码0. 1. 2. 3. 4. 5. 6. 7. 8. 9.
 
 /*共阳段码		0	  1	    2	  3	    4	  5	    6	  7	    8	  9	    C	  负号  灭  全亮  */
-// uchar sg[] = {0xC0, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8, 0x80, 0x90, 0xC6, 0x40, 0xBF, 0xFF, 0};
-// uchar sg1[] = {0x40, 0x79, 0x24, 0x30, 0x19, 0x12, 0x02, 0x78, 0x00, 0x10}; // 带点共阳段码0. 1. 2. 3. 4. 5. 6. 7. 8. 9.
+uchar seg[] = {0xC0, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8, 0x80, 0x90, 0xC6, 0x40, 0xBF, 0xFF, 0};
+uchar seg1[] = {0x40, 0x79, 0x24, 0x30, 0x19, 0x12, 0x02, 0x78, 0x00, 0x10}; // 带点共阳段码0. 1. 2. 3. 4. 5. 6. 7. 8. 9.
 
 /*----------------------------------------------------函数声明----------------------------------------------------*/
 void timer0_interrupt_init();
@@ -23,12 +24,23 @@ uchar timer0_50ms();
 char displaytemp();
 char set_limit(char TH_or_TL);
 void setluminance();
+// void c(uchar x, uchar y)
+// {
+// 	P2_2 = x - 1 & 1;
+// 	P2_3 = x - 1 >> 1 & 1;
+// 	P2_4 = x - 1 >> 2 & 1;
+// 	P0 = seg[y];
+// 	delay1ms(1);
+// 	P0 = 0;
+// }
 
 void main()
 {
 	uchar i = 0, j = 0;				// 循环变量
 	uchar precision = precision_12; // 默认转换精度12位
 	char tempreatuer = 0;			// 用于比较温度上下限的只有个位和十位的带符号温度数据
+
+	LCD_Init();
 
 	// 开局一转换，需约750ms
 	initDS18B20();
@@ -107,10 +119,11 @@ void main()
 		if (tempreatuer >= TH || tempreatuer <= TL)
 		{
 			buzzer = 0;
+			led = 0;
 			delay1ms(100);
 		}
-		else
-			buzzer = 1;
+		buzzer = 1;
+		led = 1;
 	}
 	// 若无法与DS18B20通讯，则蜂鸣器响5s后关闭
 	buzzer = 0;
@@ -182,6 +195,14 @@ char displaytemp()
 			displayTM1637(2, sg[11]);
 			displayTM1637(1, sg[12]);
 		}
+		LCD_ShowChar(2, 1, '-');
+		LCD_ShowNum(2, 2, tens_digit, 1);
+		LCD_ShowNum(2, 3, unit, 1);
+		LCD_ShowChar(2, 4, 'C');
+		// c(1, sg[11]);
+		// c(2, sg[tens_digit]);
+		// c(3, sg[unit]);
+		// c(4, sg[10]);
 	}
 	else // 正
 	{
@@ -195,9 +216,21 @@ char displaytemp()
 			displayTM1637(1, sg[tens_digit]);
 		else
 			displayTM1637(1, sg[12]);
+		LCD_ShowChar(1, 1, '+');
+		LCD_ShowNum(2, 1, tens_digit, 1);
+		LCD_ShowNum(2, 2, unit, 1);
+		LCD_ShowChar(2, 3, '.');
+		LCD_ShowNum(2, 4, tens_unit, 1);
+		LCD_ShowChar(2, 5, 'C');
+		// c(1, sg[tens_digit]);
+		// c(2, sg1[unit]);
+		// c(3, sg[tens_unit]);
+		// c(4, sg[10]);
 	}
 	displayTM1637(4, sg[10]); // 单位摄氏度C
-	delay1ms(5);			  // 过一会儿再更新温度，否则数码管闪烁,太快了时序会错，暂时不知为何
+	LCD_ShowString(1, 11, "TH:");
+	LCD_ShowNum(1, 14, TH, 2);
+	delay1ms(5); // 过一会儿再更新温度，否则数码管闪烁,太快了时序会错，暂时不知为何
 	return tempreatuer;
 }
 

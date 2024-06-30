@@ -1,12 +1,21 @@
 Build target 'Target 1'
-compiling TM1637.c...
+compiling main.c...
 linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWSIGNEDNUM?LCD1602
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWHEXNUM?LCD1602
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWBINNUM?LCD1602
+
 *** WARNING L15: MULTIPLE CALL TO SEGMENT
     SEGMENT: ?PR?KEYTM1637?TM1637
     CALLER1: ?PR?INTERRUPT0_SETLUMINANCE?MAIN
     CALLER2: ?C_C51STARTUP
 
-Program Size: data=63.2 xdata=0 code=2293
+Program Size: data=105.2 xdata=0 code=2902
 creating hex file from ".\Objects\program"...
-".\Objects\program" - 0 Error(s), 1 Warning(s).
-Build Time Elapsed:  00:00:01
+".\Objects\program" - 0 Error(s), 4 Warning(s).
+Build Time Elapsed:  00:00:00

@@ -10,11 +10,12 @@
 #define __DS18B20_H__
 
 #include "INTRINS.H"
-#include "REGX51.H"
+#include "REGX52.H"
 #include "delay1ms.h"
 
-sbit DQ = P3 ^ 7;
-sbit buzzer = P1 ^ 5;
+sbit DQ = P3 ^ 7;     // DS18B20数据线
+sbit buzzer = P1 ^ 5; // 蜂鸣器
+sbit led = P3 ^ 0;    // LED警报灯
 
 /*-----------------------------------------自定义数据类型-----------------------------------------*/
 #ifndef _uchar_

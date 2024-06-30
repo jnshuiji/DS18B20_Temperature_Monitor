@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   DS18B20                                                           06/27/2024 12:43:19 PAGE 1   
+C51 COMPILER V9.60.7.0   DS18B20                                                           06/30/2024 18:47:52 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE DS18B20
@@ -62,7 +62,7 @@ line level    source
   52   2          DQ = 1;
   53   2          dat >>= 1;
   54   2          if (DQ)
-C51 COMPILER V9.60.7.0   DS18B20                                                           06/27/2024 12:43:19 PAGE 2   
+C51 COMPILER V9.60.7.0   DS18B20                                                           06/30/2024 18:47:52 PAGE 2   
 
   55   2          {
   56   3            dat |= 0x80;
@@ -126,7 +126,7 @@ line level    source
  114           * @param {uchar} len 字节数
  115           * @return {uchar} crc 返回CRC校验码
  116           */
-C51 COMPILER V9.60.7.0   DS18B20                                                           06/27/2024 12:43:19 PAGE 3   
+C51 COMPILER V9.60.7.0   DS18B20                                                           06/30/2024 18:47:52 PAGE 3   
 
  117          uchar calcrc_bytes(uchar *p, uchar len)
  118          {
@@ -190,7 +190,7 @@ line level    source
  175   2          byte9[i] = readbyteDS18B20();
  176   2        }
  177   1        while (calcrc_bytes(&byte9, 9)) // 数据正确CRC应为0
-C51 COMPILER V9.60.7.0   DS18B20                                                           06/27/2024 12:43:19 PAGE 4   
+C51 COMPILER V9.60.7.0   DS18B20                                                           06/30/2024 18:47:52 PAGE 4   
 
  178   1        {
  179   2          buzzer = 0;
