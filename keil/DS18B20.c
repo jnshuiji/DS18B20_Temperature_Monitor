@@ -1,12 +1,15 @@
 /*
  * @Author: Quan Si
  * @Date: 2024-05-23 14:18:30
- * @LastEditTime: 2024-06-03 21:51:18
+ * @LastEditTime: 2024-06-30 22:35:02
  * @LastEditors: Quan Si
  * @Description: DS18B20驱动程序
  * @FilePath: \keil\DS18B20.c
  */
 #include "DS18B20.H"
+
+// todo: 如何搜索报警的DS18B20的ROM序列号
+// todo: 当挂载多个从设备（DS18B20）时如何搜索ROM
 
 // 12MHz
 void delay5us(uchar n)

@@ -1,11 +1,3 @@
-/***
- * @Author       : Quan Si
- * @Date         : 2024-05-23 14:18:30
- * @LastEditTime : 2024-05-31 13:25:49
- * @LastEditors  : Quan Si
- * @Description  : DS18B20驱动程序
- * @FilePath     : \keil\DS18B20.h
- */
 #ifndef __DS18B20_H__
 #define __DS18B20_H__
 
