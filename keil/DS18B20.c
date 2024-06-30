@@ -1,11 +1,3 @@
-/*
- * @Author: Quan Si
- * @Date: 2024-05-23 14:18:30
- * @LastEditTime: 2024-06-30 22:35:02
- * @LastEditors: Quan Si
- * @Description: DS18B20驱动程序
- * @FilePath: \keil\DS18B20.c
- */
 #include "DS18B20.H"
 
 // todo: 如何搜索报警的DS18B20的ROM序列号

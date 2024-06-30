@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   TM1637                                                            06/30/2024 18:47:52 PAGE 1   
+C51 COMPILER V9.60.7.0   TM1637                                                            06/30/2024 23:16:02 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TM1637
@@ -8,190 +8,167 @@ COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE TM1637.c OPTIMIZE(8,SPEED) BROWS
 
 line level    source
 
-   1          /*
-   2           * @Author: Quan Si
-   3           * @Date: 2024-05-23 16:49:56
-   4           * @LastEditTime: 2024-06-30 16:17:00
-   5           * @LastEditors: Quan Si
-   6           * @Description: TM1637驱动程序
-   7           * @FilePath: \keil\TM1637.c
-   8           */
-   9          #include "TM1637.h"
-  10          
-  11          /**
-  12           * @description: 开始
-  13           * @return {*}
-  14           */
-  15          void startTM1637()
-  16          {
-  17   1        SCL = 1;
-  18   1        _nop_();
-  19   1        SDA = 1;
-  20   1        _nop_();
-  21   1        SDA = 0;
-  22   1        _nop_();
-  23   1        SCL = 0;
-  24   1      }
-  25          
-  26          /**
-  27           * @description: 向TM1637传输一字节数据
-  28           * @param {uchar} dat
-  29           * @return {*}
-  30           */
-  31          void writeTM1637(uchar dat)
-  32          {
-  33   1        uchar i = 0;
-  34   1        for (; i < 8; i++)
-  35   1        {
-  36   2          _nop_();
-  37   2          SDA = dat & 1; // 低在前
-  38   2          SCL = 1;
-  39   2          _nop_();
-  40   2          SCL = 0;
-  41   2          dat >>= 1;
-  42   2        }
-  43   1      }
-  44          
-  45          /**
-  46           * @description: 等待TM1637应答
-  47           * @return {*}
-  48           */
-  49          void ackTM1637()
-  50          {
-  51   1        _nop_();
-  52   1        // while (SDA)
-  53   1        // {
-  54   1        //  buzzer = 0;
-C51 COMPILER V9.60.7.0   TM1637                                                            06/30/2024 18:47:52 PAGE 2   
+   1          #include "TM1637.h"
+   2          
+   3          /**
+   4           * @description: 开始
+   5           * @return {*}
+   6           */
+   7          void startTM1637()
+   8          {
+   9   1        SCL = 1;
+  10   1        SDA = 1;
+  11   1        SDA = 0;
+  12   1        SCL = 0;
+  13   1      }
+  14          
+  15          /**
+  16           * @description: 向TM1637传输一字节数据
+  17           * @param {uchar} dat
+  18           * @return {*}
+  19           */
+  20          void writeTM1637(uchar dat)
+  21          {
+  22   1        uchar i = 0;
+  23   1        for (; i < 8; i++)
+  24   1        {
+  25   2          SDA = dat & 1; // 低在前
+  26   2          SCL = 1;
+  27   2          SCL = 0;
+  28   2          dat >>= 1;
+  29   2        }
+  30   1      }
+  31          
+  32          /**
+  33           * @description: 等待TM1637应答
+  34           * @return {*}
+  35           */
+  36          void ackTM1637()
+  37          {
+  38   1        // while (SDA)
+  39   1        // {
+  40   1        //  buzzer = 0;
+  41   1        //  delay1ms(200);
+  42   1        //  buzzer = 1;
+  43   1        //  delay1ms(200);
+  44   1        // }
+  45   1        buzzer = 1;
+  46   1        SCL = 1;
+  47   1        SCL = 0;
+  48   1      }
+  49          
+  50          /**
+  51           * @description: 停止
+  52           * @return {*}
+  53           */
+  54          void stopTM1637()
+C51 COMPILER V9.60.7.0   TM1637                                                            06/30/2024 23:16:02 PAGE 2   
 
-  55   1        //  delay1ms(200);
-  56   1        //  buzzer = 1;
-  57   1        //  delay1ms(200);
-  58   1        // }
-  59   1        buzzer = 1;
-  60   1        SCL = 1;
-  61   1        _nop_();
-  62   1        SCL = 0;
-  63   1      }
-  64          
-  65          /**
-  66           * @description: 停止
-  67           * @return {*}
-  68           */
-  69          void stopTM1637()
-  70          {
-  71   1        SCL = 0;
-  72   1        _nop_();
-  73   1        SDA = 0;
-  74   1        _nop_();
-  75   1        SCL = 1;
-  76   1        _nop_();
-  77   1        SDA = 1;
-  78   1      }
-  79          
-  80          /**
-  81           * @description: 读取按键
-  82           * @return {uchar} key
-  83           */
-  84          uchar keyTM1637()
-  85          {
-  86   1        uchar key = 0, i = 0, temp = 0;
-  87   1        startTM1637();
-  88   1        writeTM1637(0x42);
-  89   1        ackTM1637();
-  90   1        SDA = 1;
-  91   1        for (; i < 8; i++)
-  92   1        {
-  93   2          temp >>= 1;
-  94   2          _nop_();
-  95   2          SCL = 1;
-  96   2          if (SDA)
-  97   2            temp |= 0x80;
-  98   2          _nop_();
-  99   2          SCL = 0;
- 100   2          _nop_();
- 101   2        }
- 102   1        ackTM1637();
- 103   1        stopTM1637();
- 104   1      
- 105   1        switch (temp)
- 106   1        {
- 107   2        case 0xFF:
- 108   2          key = 0;
- 109   2          break;
- 110   2        case 0xF7:
- 111   2          key = 1;
- 112   2          break;
- 113   2        case 0xF6:
- 114   2          key = 2;
- 115   2          break;
- 116   2        case 0xF5:
-C51 COMPILER V9.60.7.0   TM1637                                                            06/30/2024 18:47:52 PAGE 3   
+  55          {
+  56   1        SCL = 0;
+  57   1        SDA = 0;
+  58   1        SCL = 1;
+  59   1        SDA = 1;
+  60   1      }
+  61          
+  62          /**
+  63           * @description: 读取按键
+  64           * @return {uchar} key
+  65           */
+  66          uchar keyTM1637()
+  67          {
+  68   1        uchar key = 0, i = 0, temp = 0;
+  69   1        startTM1637();
+  70   1        writeTM1637(0x42);
+  71   1        ackTM1637();
+  72   1        SDA = 1;
+  73   1        for (; i < 8; i++)
+  74   1        {
+  75   2          temp >>= 1;
+  76   2          SCL = 1;
+  77   2          if (SDA)
+  78   2            temp |= 0x80;
+  79   2          SCL = 0;
+  80   2        }
+  81   1        ackTM1637();
+  82   1        stopTM1637();
+  83   1      
+  84   1        switch (temp)
+  85   1        {
+  86   2        case 0xFF:
+  87   2          key = 0;
+  88   2          break;
+  89   2        case 0xF7:
+  90   2          key = 1;
+  91   2          break;
+  92   2        case 0xF6:
+  93   2          key = 2;
+  94   2          break;
+  95   2        case 0xF5:
+  96   2          key = 3;
+  97   2          break;
+  98   2        case 0xF4:
+  99   2          key = 4;
+ 100   2          break;
+ 101   2        case 0xF3:
+ 102   2          key = 5;
+ 103   2          break;
+ 104   2        default:
+ 105   2          key = 6;
+ 106   2          break;
+ 107   2        }
+ 108   1        return key;
+ 109   1      }
+ 110          
+ 111          /**
+ 112           * @description: 设置亮度
+ 113           * @param {uchar} luminance 亮度
+ 114           * @return {*}
+ 115           */
+ 116          void setluminanceTM1637(uchar luminance)
+C51 COMPILER V9.60.7.0   TM1637                                                            06/30/2024 23:16:02 PAGE 3   
 
- 117   2          key = 3;
- 118   2          break;
- 119   2        case 0xF4:
- 120   2          key = 4;
- 121   2          break;
- 122   2        case 0xF3:
- 123   2          key = 5;
- 124   2          break;
- 125   2        default:
- 126   2          key = 6;
- 127   2          break;
- 128   2        }
- 129   1        return key;
- 130   1      }
- 131          
- 132          /**
- 133           * @description: 设置亮度
- 134           * @param {uchar} luminance 亮度
- 135           * @return {*}
- 136           */
- 137          void setluminanceTM1637(uchar luminance)
- 138          {
- 139   1        uchar temp = 0;
- 140   1        if (luminance)
- 141   1          temp = (luminance - 1) | 0x88;
- 142   1        else
- 143   1          temp = 0x80;
- 144   1      
- 145   1        startTM1637();
- 146   1        writeTM1637(temp);
+ 117          {
+ 118   1        uchar temp = 0;
+ 119   1        if (luminance)
+ 120   1          temp = (luminance - 1) | 0x88;
+ 121   1        else
+ 122   1          temp = 0x80;
+ 123   1      
+ 124   1        startTM1637();
+ 125   1        writeTM1637(temp);
+ 126   1        ackTM1637();
+ 127   1        stopTM1637();
+ 128   1      }
+ 129          
+ 130          /**
+ 131           * @description: 数码管显示
+ 132           * @param {uchar} grid 位置
+ 133           * @param {uchar} sg   显示码
+ 134           * @return {*}
+ 135           */
+ 136          void displayTM1637(uchar grid, uchar sg)
+ 137          {
+ 138   1        startTM1637();
+ 139   1        writeTM1637(0x44);
+ 140   1        ackTM1637();
+ 141   1        stopTM1637();
+ 142   1      
+ 143   1        startTM1637();
+ 144   1        writeTM1637((grid - 1) | 0xC0);
+ 145   1        ackTM1637();
+ 146   1        writeTM1637(sg);
  147   1        ackTM1637();
  148   1        stopTM1637();
  149   1      }
- 150          
- 151          /**
- 152           * @description: 数码管显示
- 153           * @param {uchar} grid 位置
- 154           * @param {uchar} sg   显示码
- 155           * @return {*}
- 156           */
- 157          void displayTM1637(uchar grid, uchar sg)
- 158          {
- 159   1        startTM1637();
- 160   1        writeTM1637(0x44);
- 161   1        ackTM1637();
- 162   1        stopTM1637();
- 163   1      
- 164   1        startTM1637();
- 165   1        writeTM1637((grid - 1) | 0xC0);
- 166   1        ackTM1637();
- 167   1        writeTM1637(sg);
- 168   1        ackTM1637();
- 169   1        stopTM1637();
- 170   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    224    ----
+   CODE SIZE        =    211    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----       1
-C51 COMPILER V9.60.7.0   TM1637                                                            06/30/2024 18:47:52 PAGE 4   
-
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
